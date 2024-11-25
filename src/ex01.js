@@ -24,8 +24,9 @@ export default function example() {
 		0.1,
 		1000
 	);
-	camera.position.y = 1.5;
-	camera.position.z = 4;
+	// camera.position.x = 3;
+	// camera.position.y = 5;
+	// camera.position.z = 5;
 	scene.add(camera);
 
 	// Light
@@ -39,16 +40,50 @@ export default function example() {
 
 	// Controls
 	const controls = new OrbitControls(camera, renderer.domElement);
+	controls.enableDamping = true;
+	controls.autoRotate = true;
 
 	// gltf loader
 	const gltfLoader = new GLTFLoader();
 	gltfLoader.load(
 		'./models/isometric-room-02.glb',
 		gltf => {
+			const room = gltf.scene.children[0];
+
 			console.log(gltf.scene.children[0]);
 			console.log(gltf.scene);
-			const ilbuniMesh = gltf.scene.children[0];
-			scene.add(ilbuniMesh)
+
+			const box = new THREE.Box3().setFromObject(gltf.scene); // 가상의 박스를 만들어서 gltf.scene의 크기를 구함
+			const size = box.getSize(new THREE.Vector3()).length();
+			const center = box.getCenter(new THREE.Vector3());
+
+			controls.reset(); // 카메라 위치 초기화
+
+			room.position.x -= center.x;
+			room.position.y -= center.y;
+			room.position.z -= center.z;
+
+			controls.maxDistance = size * 10;
+
+			camera.near = size / 100;
+			camera.far = size * 100;
+			camera.updateProjectionMatrix();
+
+			camera.position.copy(center);
+			camera.position.x += size / 2;
+			camera.position.y += size / 5;
+			camera.position.z += size / 2;
+			camera.lookAt(center);
+
+			console.log("CAMERA POSITION: ", camera.position);
+
+			controls.saveState();
+
+			console.log("BOX: ", box);
+			console.log("SIZE: ", size);
+			console.log("CENTER: ", center);
+
+			scene.add(room);
 		}
 	)
 
@@ -58,6 +93,8 @@ export default function example() {
 
 	function draw() {
 		const delta = clock.getDelta();
+
+		controls.update();
 
 		renderer.render(scene, camera);
 		renderer.setAnimationLoop(draw);
