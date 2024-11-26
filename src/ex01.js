@@ -54,7 +54,7 @@ export default function example() {
 			console.log(gltf.scene);
 
 			const box = new THREE.Box3().setFromObject(gltf.scene); // 가상의 박스를 만들어서 gltf.scene의 크기를 구함
-			const size = box.getSize(new THREE.Vector3()).length();
+			const size = box.getSize(new THREE.Vector3()).length(); // 박스의 대각선 길이, 전체적인 공간의 크기
 			const center = box.getCenter(new THREE.Vector3());
 
 			controls.reset(); // 카메라 위치 초기화
